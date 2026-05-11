@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { getWatchlist, saveWatchlist } from '../services/api';
 
-export type ListType = 'watchlist' | 'watching' | 'completed' | 'dropped' | 'planning';
+export type ListType = 'watchlist' | 'watching' | 'completed' | 'dropped';
 
 export interface ListItem {
   id: number;
@@ -13,6 +14,7 @@ export interface ListItem {
   rating?: number;
   episodes?: number;
   currentEpisode?: number;
+  genres?: string[];
 }
 
 interface UserLists {
@@ -20,17 +22,51 @@ interface UserLists {
   watching: ListItem[];
   completed: ListItem[];
   dropped: ListItem[];
-  planning: ListItem[];
 }
 
 const STORAGE_KEY = 'user_lists';
+const USER_ID_KEY = 'user_id';
+
+function getOrCreateUserId(): string {
+  try {
+    let id = localStorage.getItem(USER_ID_KEY);
+    if (!id) {
+      id = `user_${Math.random().toString(36).slice(2, 9)}`;
+      localStorage.setItem(USER_ID_KEY, id);
+    }
+    return id;
+  } catch (e) {
+    return 'anonymous';
+  }
+}
+
+// Ensure lists object has proper structure with all list types as arrays
+function ensureListStructure(data: any): UserLists {
+  const defaultStructure: UserLists = {
+    watchlist: [],
+    watching: [],
+    completed: [],
+    dropped: [],
+  };
+
+  if (!data || typeof data !== 'object') {
+    return defaultStructure;
+  }
+
+  return {
+    watchlist: Array.isArray(data.watchlist) ? data.watchlist : [],
+    watching: Array.isArray(data.watching) ? data.watching : [],
+    completed: Array.isArray(data.completed) ? data.completed : [],
+    dropped: Array.isArray(data.dropped) ? data.dropped : [],
+  };
+}
 
 // Get lists from localStorage
 function getStoredLists(): UserLists {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      return ensureListStructure(JSON.parse(stored));
     }
   } catch (error) {
     console.error('Error loading lists from storage:', error);
@@ -41,7 +77,6 @@ function getStoredLists(): UserLists {
     watching: [],
     completed: [],
     dropped: [],
-    planning: [],
   };
 }
 
@@ -56,26 +91,62 @@ function saveListsToStorage(lists: UserLists) {
 
 export function useListManager() {
   const [lists, setLists] = useState<UserLists>(getStoredLists());
+  const userId = getOrCreateUserId();
 
   // Save to storage whenever lists change
   useEffect(() => {
     saveListsToStorage(lists);
+    // Also try to persist to Supabase server (best-effort)
+    (async () => {
+      try {
+        await saveWatchlist(userId, lists);
+      } catch (err) {
+        // ignore network errors; localStorage remains primary
+        console.warn('Failed to sync watchlist to server:', err);
+      }
+    })();
   }, [lists]);
+
+  // On mount, try to load lists from server (overrides localStorage if present)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await getWatchlist(userId);
+        if (!mounted) return;
+        if (data && !data.error && data.watchlist) {
+          setLists(ensureListStructure(data.watchlist));
+        }
+      } catch (err) {
+        // ignore; use local storage fallback
+        console.warn('Failed to load watchlist from server:', err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Add item to a list
   const addToList = (listType: ListType, item: Omit<ListItem, 'addedDate'>) => {
     setLists((prev) => {
       // Remove from all other lists first
       const newLists = { ...prev };
-      Object.keys(newLists).forEach((key) => {
-        newLists[key as ListType] = newLists[key as ListType].filter(
-          (i) => !(i.id === item.id && i.type === item.type)
-        );
+      (Object.keys(newLists) as ListType[]).forEach((key) => {
+        const listItems = newLists[key];
+        if (Array.isArray(listItems)) {
+          newLists[key] = listItems.filter(
+            (i) => !(i.id === item.id && i.type === item.type)
+          );
+        } else {
+          newLists[key] = [];
+        }
       });
 
       // Add to the specified list
+      const targetList = newLists[listType];
       newLists[listType] = [
-        ...newLists[listType],
+        ...(Array.isArray(targetList) ? targetList : []),
         { ...item, addedDate: new Date().toISOString() },
       ];
 
@@ -85,16 +156,21 @@ export function useListManager() {
 
   // Remove item from a list
   const removeFromList = (listType: ListType, id: number, type: string) => {
-    setLists((prev) => ({
-      ...prev,
-      [listType]: prev[listType].filter((item) => !(item.id === id && item.type === type)),
-    }));
+    setLists((prev) => {
+      const listItems = prev[listType];
+      return {
+        ...prev,
+        [listType]: Array.isArray(listItems)
+          ? listItems.filter((item) => !(item.id === id && item.type === type))
+          : [],
+      };
+    });
   };
 
   // Check if item is in any list
   const getItemList = (id: number, type: string): ListType | null => {
     for (const [listType, items] of Object.entries(lists)) {
-      if (items.some((item) => item.id === id && item.type === type)) {
+      if (Array.isArray(items) && items.some((item) => item.id === id && item.type === type)) {
         return listType as ListType;
       }
     }
@@ -105,16 +181,19 @@ export function useListManager() {
   const updateProgress = (id: number, type: string, currentEpisode: number) => {
     setLists((prev) => {
       const newLists = { ...prev };
-      Object.keys(newLists).forEach((key) => {
-        newLists[key as ListType] = newLists[key as ListType].map((item) =>
-          item.id === id && item.type === type
-            ? {
-                ...item,
-                currentEpisode,
-                progress: item.episodes ? `${currentEpisode}/${item.episodes}` : undefined,
-              }
-            : item
-        );
+      (Object.keys(newLists) as ListType[]).forEach((key) => {
+        const listItems = newLists[key];
+        if (Array.isArray(listItems)) {
+          newLists[key] = listItems.map((item) =>
+            item.id === id && item.type === type
+              ? {
+                  ...item,
+                  currentEpisode,
+                  progress: item.episodes ? `${currentEpisode}/${item.episodes}` : undefined,
+                }
+              : item
+          );
+        }
       });
       return newLists;
     });
@@ -124,10 +203,13 @@ export function useListManager() {
   const updateRating = (id: number, type: string, rating: number) => {
     setLists((prev) => {
       const newLists = { ...prev };
-      Object.keys(newLists).forEach((key) => {
-        newLists[key as ListType] = newLists[key as ListType].map((item) =>
-          item.id === id && item.type === type ? { ...item, rating } : item
-        );
+      (Object.keys(newLists) as ListType[]).forEach((key) => {
+        const listItems = newLists[key];
+        if (Array.isArray(listItems)) {
+          newLists[key] = listItems.map((item) =>
+            item.id === id && item.type === type ? { ...item, rating } : item
+          );
+        }
       });
       return newLists;
     });

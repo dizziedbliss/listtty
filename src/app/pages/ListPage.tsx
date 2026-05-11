@@ -20,7 +20,6 @@ export function ListPage() {
     watching: 'Currently Watching',
     completed: 'Completed',
     dropped: 'Dropped',
-    planning: 'Plan to Watch',
   };
 
   const listDescriptions: Record<ListType, string> = {
@@ -28,7 +27,6 @@ export function ListPage() {
     watching: 'Currently watching or in progress',
     completed: 'All finished items',
     dropped: 'Items you stopped watching',
-    planning: 'Planning to watch in the future',
   };
 
   const currentListType = listType as ListType;

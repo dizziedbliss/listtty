@@ -1,52 +1,29 @@
-import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Heart, Plus, Star, Check } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ArrowLeft, Star } from 'lucide-react';
 import { fetchAnimeDetails, fetchMovieDetails, fetchShowDetails, AnimeDetails, MovieDetails, ShowDetails } from '../services/details';
-import { useList, ListType } from '../contexts/ListContext';
 import { ListDropdown } from '../components/ListDropdown';
-
-const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original';
+import { TMDB_IMAGE_BASE } from '../services/details';
 
 export function DetailsPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
+  const normalizedType = type === 'movies' ? 'movie' : type === 'shows' ? 'show' : type;
 
   const { data: details, isLoading, error } = useQuery({
-    queryKey: ['details', type, id],
+    queryKey: ['details', normalizedType, id],
     queryFn: async () => {
-      if (type === 'anime') {
+      if (normalizedType === 'anime') {
         return { type: 'anime', data: await fetchAnimeDetails(Number(id)) };
-      } else if (type === 'movie') {
+      } else if (normalizedType === 'movie') {
         return { type: 'movie', data: await fetchMovieDetails(Number(id)) };
-      } else if (type === 'show') {
+      } else if (normalizedType === 'show') {
         return { type: 'show', data: await fetchShowDetails(Number(id)) };
       }
       throw new Error('Invalid media type');
     },
-    enabled: !!id && !!type,
-  });
-
-  // Fetch recommendations for movies/shows
-  const { data: recommendations } = useQuery({
-    queryKey: ['recommendations', type, id],
-    queryFn: async () => {
-      if (type === 'movie' || type === 'show') {
-        const response = await fetch(
-          `https://txypbmtiddzurtjxjnyb.supabase.co/functions/v1/make-server-19aaa725/api/${type}/${id}/recommendations`,
-          {
-            headers: {
-              'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4eXBibXRpZGR6dXJ0anhqbnliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1MjI1OTgsImV4cCI6MjA5NDA5ODU5OH0.V7S1_om13vI-QpLk3WFTXjiPv9OZ6-_PuQ-T4fJhQcY`
-            }
-          }
-        );
-        const data = await response.json();
-        return data.results || [];
-      }
-      return [];
-    },
-    enabled: !!id && (type === 'movie' || type === 'show'),
+    enabled: !!id && !!normalizedType,
   });
 
   if (isLoading) {
@@ -325,6 +302,8 @@ export function DetailsPage() {
   const title = isMovie ? (media as MovieDetails).title : (media as ShowDetails).name;
   const releaseDate = isMovie ? (media as MovieDetails).release_date : (media as ShowDetails).first_air_date;
   const runtime = isMovie ? (media as MovieDetails).runtime : (media as ShowDetails).episode_run_time?.[0];
+  const cast = media.credits?.cast || [];
+  const recommendations = media.recommendations?.results || [];
 
   return (
     <div className="min-h-screen bg-[#0b1622] text-white pb-32">
@@ -486,7 +465,7 @@ export function DetailsPage() {
         </div>
 
         {/* Cast */}
-        {media.cast && media.cast.length > 0 && (
+        {cast.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -495,7 +474,7 @@ export function DetailsPage() {
           >
             <h2 className="text-2xl font-semibold mb-4">Cast</h2>
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-              {media.cast.slice(0, 12).map((actor) => (
+              {cast.slice(0, 12).map((actor) => (
                 <div
                   key={actor.id}
                   className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden hover:scale-105 hover:border-white/20 transition-all group"
@@ -522,7 +501,7 @@ export function DetailsPage() {
         )}
 
         {/* Recommendations */}
-        {recommendations && recommendations.length > 0 && (
+        {recommendations.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -534,7 +513,7 @@ export function DetailsPage() {
               {recommendations.slice(0, 6).map((item: any) => (
                 <div
                   key={item.id}
-                  onClick={() => navigate(`/${type}/${item.id}`)}
+                  onClick={() => navigate(`/${isMovie ? 'movie' : 'show'}/${item.id}`)}
                   className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden hover:scale-105 hover:border-white/20 transition-all cursor-pointer group"
                 >
                   <img

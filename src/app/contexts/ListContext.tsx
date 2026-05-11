@@ -7,7 +7,6 @@ interface ListContextType {
     watching: ListItem[];
     completed: ListItem[];
     dropped: ListItem[];
-    planning: ListItem[];
   };
   addToList: (listType: ListType, item: Omit<ListItem, 'addedDate'>) => void;
   removeFromList: (listType: ListType, id: number, type: string) => void;

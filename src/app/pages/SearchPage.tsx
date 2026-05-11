@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useMoviesData, useShowsData, useAnimeData } from '../hooks/useMediaData';
 import { searchAnime } from '../services/anilist';
 import { MediaItem } from '../data/mockData';
 
@@ -15,22 +15,19 @@ export function SearchPage() {
   const [selectedFormat, setSelectedFormat] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
+  const [searchType, setSearchType] = useState<'movies' | 'shows' | 'anime'>('anime');
 
-  const { data: results = [], isLoading } = useQuery({
-    queryKey: ['search', query],
-    queryFn: async () => {
-      if (!query) return [];
-      const data = await searchAnime(query);
-      return data.map((anime): MediaItem => ({
-        id: anime.id,
-        title: anime.title.english || anime.title.romaji,
-        poster: anime.coverImage.large,
-        year: anime.seasonYear?.toString() || 'N/A',
-        type: 'anime',
-      }));
-    },
-    enabled: query.length > 0,
-  });
+  const { data: moviesData = [] } = useMoviesData(query);
+  const { data: showsData = [] } = useShowsData(query);
+  const { data: animeData = [] } = useAnimeData(query);
+
+  const results = {
+    movies: moviesData.map((item) => ({ ...item, type: 'movie' as const })),
+    shows: showsData.map((item) => ({ ...item, type: 'show' as const })),
+    anime: animeData,
+  }[searchType];
+
+  const isLoading = false;
 
   const genres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Mystery', 'Romance', 'Sci-Fi', 'Slice of Life'];
   const formats = ['TV', 'Movie', 'OVA', 'ONA', 'Special'];
@@ -41,6 +38,12 @@ export function SearchPage() {
     if (query) {
       setSearchParams({ q: query });
     }
+  };
+
+  const handleItemClick = (item: any) => {
+    const type = item.type || searchType;
+    const routeType = type === 'movies' ? 'movie' : type === 'shows' ? 'show' : 'anime';
+    navigate(`/${routeType}/${item.id}`);
   };
 
   const toggleGenre = (genre: string) => {
@@ -89,6 +92,23 @@ export function SearchPage() {
               <SlidersHorizontal className="w-5 h-5" />
               Filters
             </button>
+          </div>
+
+          {/* Type Tabs */}
+          <div className="flex gap-2 mt-6">
+            {['movies', 'shows', 'anime'].map((type) => (
+              <button
+                key={type}
+                onClick={() => setSearchType(type as 'movies' | 'shows' | 'anime')}
+                className={`px-6 py-2 rounded-lg border-2 transition-all capitalize font-semibold ${
+                  searchType === type
+                    ? 'bg-purple-600 border-purple-500 text-white'
+                    : 'bg-transparent border-white/20 text-gray-400 hover:border-white/40'
+                }`}
+              >
+                {type}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -192,12 +212,7 @@ export function SearchPage() {
 
         {/* Results */}
         <div>
-          {isLoading ? (
-            <div className="text-center py-20">
-              <div className="inline-block w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-white mt-4">Searching...</p>
-            </div>
-          ) : query && results.length === 0 ? (
+          {query && results.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-2xl text-gray-400">No results found for "{query}"</p>
             </div>
@@ -207,11 +222,11 @@ export function SearchPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {results.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={`${item.id}-${item.type}`}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.05 }}
-                    onClick={() => navigate(`/anime/${item.id}`)}
+                    onClick={() => handleItemClick(item)}
                     className="group cursor-pointer"
                   >
                     <div className="relative overflow-hidden rounded-lg mb-3 aspect-[2/3]">

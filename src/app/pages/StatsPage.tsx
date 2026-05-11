@@ -1,40 +1,99 @@
 import { motion } from 'motion/react';
 import { TrendingUp, Clock, Star, Award, Calendar, BarChart3 } from 'lucide-react';
+import { useList } from '../contexts/ListContext';
 
 export function StatsPage() {
+  const { lists } = useList();
+
+  // Calculate real stats from user's lists
+  const allItems = [
+    ...lists.completed,
+    ...lists.watching,
+    ...lists.watchlist,
+    ...lists.dropped,
+  ];
+
+  const completedItems = lists.completed;
+  const totalWatched = completedItems.length;
+  const totalHours = completedItems.reduce((sum, item) => {
+    // Estimate based on episodes (assume ~23 min per episode for anime, ~42 min for TV, ~2 hours for movies)
+    if (item.type === 'anime' && item.episodes) return sum + item.episodes * 0.38;
+    if (item.type === 'show' && item.episodes) return sum + item.episodes * 0.7;
+    if (item.type === 'movie') return sum + 2;
+    return sum;
+  }, 0);
+  const averageScore = completedItems.length > 0
+    ? (completedItems.reduce((sum, item) => sum + (item.rating || 0), 0) / completedItems.length).toFixed(1)
+    : 0;
+  const completionRate = allItems.length > 0
+    ? Math.round((completedItems.length / allItems.length) * 100)
+    : 0;
+  const daysWatched = totalHours / 24;
+  const episodesWatched = completedItems.reduce((sum, item) => sum + (item.episodes || (item.currentEpisode || 0)), 0);
+
   const stats = {
-    totalWatched: 156,
-    totalHours: 2340,
-    averageScore: 8.2,
-    completionRate: 78,
-    daysWatched: 97.5,
-    episodesWatched: 1872,
+    totalWatched,
+    totalHours: Math.round(totalHours),
+    averageScore: averageScore,
+    completionRate,
+    daysWatched: daysWatched.toFixed(1),
+    episodesWatched,
   };
 
-  const genreDistribution = [
-    { name: 'Action', count: 45, color: '#8A38F5' },
-    { name: 'Comedy', count: 38, color: '#C77DFF' },
-    { name: 'Drama', count: 32, color: '#E0AAFF' },
-    { name: 'Romance', count: 28, color: '#9D4EDD' },
-    { name: 'Sci-Fi', count: 13, color: '#5A189A' },
-  ];
+  // Calculate recent activity from all lists (sorted by added date)
+  const recentActivity = allItems
+    .sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime())
+    .slice(0, 4)
+    .map((item) => ({
+      date: new Date(item.addedDate).toLocaleDateString(),
+      action: lists.completed.some((i) => i.id === item.id && i.type === item.type)
+        ? 'Completed'
+        : lists.watching.some((i) => i.id === item.id && i.type === item.type)
+          ? 'Watching'
+          : 'Added',
+      title: item.title,
+      episodes: item.episodes || 0,
+    }));
 
-  const recentActivity = [
-    { date: '2024-05-10', action: 'Completed', title: 'Attack on Titan', episodes: 87 },
-    { date: '2024-05-09', action: 'Watched', title: 'Demon Slayer', episodes: 3 },
-    { date: '2024-05-08', action: 'Added', title: 'Jujutsu Kaisen', episodes: 0 },
-    { date: '2024-05-07', action: 'Watched', title: 'Your Name', episodes: 1 },
-  ];
+  // Calculate monthly progress (show recent months with activity)
+  const monthlyProgress = Array.from({ length: 5 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - (4 - i));
+    const month = date.toLocaleString('default', { month: 'short' });
+    const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+    const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
-  const monthlyProgress = [
-    { month: 'Jan', count: 12 },
-    { month: 'Feb', count: 15 },
-    { month: 'Mar', count: 18 },
-    { month: 'Apr', count: 14 },
-    { month: 'May', count: 10 },
-  ];
+    const count = allItems.filter((item) => {
+      const itemDate = new Date(item.addedDate);
+      return itemDate >= monthStart && itemDate <= monthEnd;
+    }).length;
 
-  const maxMonthly = Math.max(...monthlyProgress.map((m) => m.count));
+    return { month, count };
+  });
+
+  const maxMonthly = Math.max(...monthlyProgress.map((m) => m.count), 1);
+
+  // Calculate genre distribution
+  const genreMap = new Map<string, { count: number; color: string }>();
+  const colors = ['#a855f7', '#ec4899', '#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#06b6d4'];
+  let colorIndex = 0;
+
+  completedItems.forEach((item) => {
+    const genres = item.genres || [];
+    genres.forEach((genre: string) => {
+      if (!genreMap.has(genre)) {
+        genreMap.set(genre, { count: 0, color: colors[colorIndex % colors.length] });
+        colorIndex++;
+      }
+      const entry = genreMap.get(genre);
+      if (entry) entry.count++;
+    });
+  });
+
+  const genreDistribution = Array.from(genreMap.entries())
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
 
   return (
     <div className="min-h-screen pb-32">

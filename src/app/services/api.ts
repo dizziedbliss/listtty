@@ -45,10 +45,10 @@ export async function getWatchlist(userId: string) {
   return fetchFromServer(`/api/watchlist/${userId}`);
 }
 
-export async function saveWatchlist(userId: string, watchlist: any[]) {
+export async function saveWatchlist(userId: string, lists: Record<string, any>) {
   return fetchFromServer(`/api/watchlist/${userId}`, {
     method: 'POST',
-    body: { watchlist },
+    body: lists,
   });
 }
 
@@ -60,5 +60,55 @@ export async function saveProgress(userId: string, progress: Record<string, any>
   return fetchFromServer(`/api/progress/${userId}`, {
     method: 'POST',
     body: { progress },
+  });
+}
+
+// Friends API
+export async function sendFriendRequest(fromUserId: string, toUsername: string) {
+  return fetchFromServer(`/api/friends/request`, {
+    method: 'POST',
+    body: { fromUserId, toUsername },
+  });
+}
+
+export async function getFriendRequests(userId: string) {
+  return fetchFromServer(`/api/friends/requests/${userId}`);
+}
+
+export async function acceptFriendRequest(requestId: string) {
+  return fetchFromServer(`/api/friends/request/${requestId}/accept`, {
+    method: 'POST',
+  });
+}
+
+export async function declineFriendRequest(requestId: string) {
+  return fetchFromServer(`/api/friends/request/${requestId}/decline`, {
+    method: 'POST',
+  });
+}
+
+export async function getFriends(userId: string) {
+  return fetchFromServer(`/api/friends/${userId}`);
+}
+
+export async function removeFriend(userId1: string, userId2: string) {
+  return fetchFromServer(`/api/friends/remove`, {
+    method: 'POST',
+    body: { userId1, userId2 },
+  });
+}
+
+export async function searchUsers(query: string) {
+  return fetchFromServer(`/api/users/search?q=${encodeURIComponent(query)}`);
+}
+
+export async function getUserProfile(userId: string) {
+  return fetchFromServer(`/api/users/${userId}`);
+}
+
+export async function updateUserProfile(userId: string, profile: Record<string, any>) {
+  return fetchFromServer(`/api/users/${userId}`, {
+    method: 'PUT',
+    body: profile,
   });
 }
