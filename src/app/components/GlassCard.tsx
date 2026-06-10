@@ -13,10 +13,10 @@ export function GlassCard({ children, className = '', delay = 0 }: GlassCardProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.6, ease: 'easeOut' }}
-      className={`bg-[rgba(138,56,245,0.15)] backdrop-blur-xl border-2 border-black/30 rounded-xl shadow-xl relative overflow-hidden ${className}`}
+      className={`bg-[rgba(255,255,255,0.06)] backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl relative overflow-hidden ${className}`}
       whileHover={{
         scale: 1.01,
-        boxShadow: '0 20px 40px rgba(138, 56, 245, 0.3)',
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.28)',
         transition: { duration: 0.3 }
       }}
     >

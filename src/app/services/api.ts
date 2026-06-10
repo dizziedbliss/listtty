@@ -21,7 +21,8 @@ async function fetchFromServer(endpoint: string, options: FetchOptions = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(`Server error: ${response.statusText}`);
+    const errorText = await response.text().catch(() => '');
+    throw new Error(errorText || `Server error: ${response.status} ${response.statusText}`);
   }
 
   return response.json();
@@ -110,5 +111,36 @@ export async function updateUserProfile(userId: string, profile: Record<string, 
   return fetchFromServer(`/api/users/${userId}`, {
     method: 'PUT',
     body: profile,
+  });
+}
+
+export async function getAniListStatus(userId: string) {
+  return fetchFromServer(`/api/anilist/status/${userId}`);
+}
+
+export async function getAniListAuthUrl(userId: string, clientId?: string, redirectUri?: string) {
+  const params = new URLSearchParams({ userId });
+  if (clientId) params.set('clientId', clientId);
+  if (redirectUri) params.set('redirectUri', redirectUri);
+  return fetchFromServer(`/api/anilist/auth-url?${params.toString()}`);
+}
+
+export async function unlinkAniListAccount(userId: string) {
+  return fetchFromServer(`/api/anilist/link/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function importAniListLibrary(userId: string) {
+  return fetchFromServer(`/api/anilist/import/${userId}`, {
+    method: 'POST',
+    body: {},
+  });
+}
+
+export async function syncAniListLibrary(userId: string, lists: Array<{ status: string; items: Array<Record<string, any>> }>) {
+  return fetchFromServer(`/api/anilist/sync/${userId}`, {
+    method: 'POST',
+    body: { lists },
   });
 }

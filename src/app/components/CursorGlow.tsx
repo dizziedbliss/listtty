@@ -20,7 +20,7 @@ export function CursorGlow() {
       ref={glowRef}
       className="fixed w-[400px] h-[400px] pointer-events-none -translate-x-1/2 -translate-y-1/2 z-50"
       style={{
-        background: 'radial-gradient(circle, rgba(138,56,245,0.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%)',
         filter: 'blur(40px)',
       }}
     />

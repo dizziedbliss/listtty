@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getWatchlist, saveWatchlist } from '../services/api';
+import { getWatchlist, saveWatchlist, getProgress, saveProgress } from '../services/api';
 
 export type ListType = 'watchlist' | 'watching' | 'completed' | 'dropped';
 
@@ -89,43 +89,112 @@ function saveListsToStorage(lists: UserLists) {
   }
 }
 
+function mergeListItems(existing: ListItem[], incoming: ListItem[]) {
+  const merged = [...existing];
+
+  incoming.forEach((item) => {
+    const index = merged.findIndex((current) => current.id === item.id && current.type === item.type);
+    if (index >= 0) {
+      merged[index] = {
+        ...merged[index],
+        ...item,
+        addedDate: merged[index].addedDate || item.addedDate,
+        rating: merged[index].rating ?? item.rating,
+        progress: item.progress ?? merged[index].progress,
+        currentEpisode: item.currentEpisode ?? merged[index].currentEpisode,
+      };
+    } else {
+      merged.push(item);
+    }
+  });
+
+  return merged;
+}
+
 export function useListManager() {
   const [lists, setLists] = useState<UserLists>(getStoredLists());
+  const [hydrated, setHydrated] = useState(false);
+  const [lastProgressChange, setLastProgressChange] = useState<{
+    id: number;
+    type: string;
+    previousEpisode: number;
+    timestamp: number;
+  } | null>(null);
   const userId = getOrCreateUserId();
 
   // Save to storage whenever lists change
   useEffect(() => {
     saveListsToStorage(lists);
-    // Also try to persist to Supabase server (best-effort)
+    if (!hydrated) return;
     (async () => {
       try {
         await saveWatchlist(userId, lists);
-      } catch (err) {
-        // ignore network errors; localStorage remains primary
-        console.warn('Failed to sync watchlist to server:', err);
+      } catch (error) {
+        console.warn('Failed to save lists to server:', error);
       }
     })();
-  }, [lists]);
+  }, [lists, userId, hydrated]);
 
-  // On mount, try to load lists from server (overrides localStorage if present)
   useEffect(() => {
-    let mounted = true;
+    let cancelled = false;
+
     (async () => {
       try {
-        const data = await getWatchlist(userId);
-        if (!mounted) return;
-        if (data && !data.error && data.watchlist) {
-          setLists(ensureListStructure(data.watchlist));
+        const response = await getWatchlist(userId);
+        if (!cancelled && response?.watchlist) {
+          const serverLists = ensureListStructure(response.watchlist);
+          const hasServerData = Object.values(serverLists).some((items) => items.length > 0);
+          if (hasServerData) {
+            setLists(serverLists);
+          }
         }
-      } catch (err) {
-        // ignore; use local storage fallback
-        console.warn('Failed to load watchlist from server:', err);
+      } catch (error) {
+        console.warn('Failed to load lists from server:', error);
+      }
+
+      try {
+        const response = await getProgress(userId);
+        if (cancelled || !response?.progress) return;
+        const progressMap = response.progress || {};
+        setLists((prev) => {
+          const next = { ...prev };
+
+          (Object.keys(next) as ListType[]).forEach((listType) => {
+            next[listType] = next[listType].map((item) => {
+              const progressEntry = progressMap?.[`${item.type}:${item.id}`] || progressMap?.[String(item.id)];
+              if (!progressEntry) return item;
+
+              const currentEpisode = typeof progressEntry.currentEpisode === 'number'
+                ? progressEntry.currentEpisode
+                : typeof progressEntry === 'number'
+                  ? progressEntry
+                  : item.currentEpisode;
+
+              return {
+                ...item,
+                currentEpisode,
+                progress: item.episodes && typeof currentEpisode === 'number'
+                  ? `${currentEpisode}/${item.episodes}`
+                  : item.progress,
+              };
+            });
+          });
+
+          return next;
+        });
+      } catch (error) {
+        console.warn('Failed to load progress from server:', error);
+      }
+
+      if (!cancelled) {
+        setHydrated(true);
       }
     })();
+
     return () => {
-      mounted = false;
+      cancelled = true;
     };
-  }, []);
+  }, [userId]);
 
   // Add item to a list
   const addToList = (listType: ListType, item: Omit<ListItem, 'addedDate'>) => {
@@ -179,28 +248,69 @@ export function useListManager() {
 
   // Update item progress
   const updateProgress = (id: number, type: string, currentEpisode: number) => {
+    let nextListsSnapshot: UserLists | null = null;
+
     setLists((prev) => {
       const newLists = { ...prev };
+      let previousEpisode = 0;
       (Object.keys(newLists) as ListType[]).forEach((key) => {
         const listItems = newLists[key];
         if (Array.isArray(listItems)) {
-          newLists[key] = listItems.map((item) =>
-            item.id === id && item.type === type
-              ? {
-                  ...item,
-                  currentEpisode,
-                  progress: item.episodes ? `${currentEpisode}/${item.episodes}` : undefined,
-                }
-              : item
-          );
+          newLists[key] = listItems.map((item) => {
+            if (item.id === id && item.type === type) {
+              previousEpisode = item.currentEpisode || 0;
+              return {
+                ...item,
+                currentEpisode,
+                progress: item.episodes ? `${currentEpisode}/${item.episodes}` : undefined,
+              };
+            }
+            return item;
+          });
         }
       });
+      
+      // Track the last change for undo
+      setLastProgressChange({
+        id,
+        type,
+        previousEpisode,
+        timestamp: Date.now(),
+      });
+
+      nextListsSnapshot = newLists;
+      
       return newLists;
     });
+
+    (async () => {
+      try {
+        const currentLists = nextListsSnapshot || getStoredLists();
+        const progress = Object.fromEntries(
+          Object.values(currentLists)
+            .flat()
+            .map((item) => [`${item.type}:${item.id}`, { currentEpisode: item.currentEpisode || 0 }])
+        );
+        await saveProgress(userId, progress);
+      } catch (error) {
+        console.warn('Failed to save progress to server:', error);
+      }
+    })();
+  };
+
+  // Undo the last progress change
+  const undoLastProgress = () => {
+    if (!lastProgressChange) return;
+    
+    const { id, type, previousEpisode } = lastProgressChange;
+    updateProgress(id, type, previousEpisode);
+    setLastProgressChange(null);
   };
 
   // Update item rating
   const updateRating = (id: number, type: string, rating: number) => {
+    let nextListsSnapshot: UserLists | null = null;
+
     setLists((prev) => {
       const newLists = { ...prev };
       (Object.keys(newLists) as ListType[]).forEach((key) => {
@@ -211,7 +321,31 @@ export function useListManager() {
           );
         }
       });
+
+      nextListsSnapshot = newLists;
       return newLists;
+    });
+
+    saveWatchlist(userId, nextListsSnapshot || getStoredLists()).catch((error) => {
+      console.warn('Failed to persist rating update:', error);
+    });
+  };
+
+  const mergeExternalLists = (incoming: Partial<UserLists>) => {
+    setLists((prev) => {
+      const next = {
+      watchlist: mergeListItems(prev.watchlist, incoming.watchlist || []),
+      watching: mergeListItems(prev.watching, incoming.watching || []),
+      completed: mergeListItems(prev.completed, incoming.completed || []),
+      dropped: mergeListItems(prev.dropped, incoming.dropped || []),
+      };
+
+      saveListsToStorage(next);
+      saveWatchlist(userId, next).catch((error) => {
+        console.warn('Failed to sync merged lists to server:', error);
+      });
+
+      return next;
     });
   };
 
@@ -222,5 +356,8 @@ export function useListManager() {
     getItemList,
     updateProgress,
     updateRating,
+    undoLastProgress,
+    lastProgressChange,
+    mergeExternalLists,
   };
 }

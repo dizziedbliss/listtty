@@ -35,7 +35,7 @@ export function SetupNotification({ activeCategory }: SetupNotificationProps) {
           exit={{ opacity: 0, y: -20 }}
           className="mb-6"
         >
-          <div className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 backdrop-blur-xl border-2 border-purple-400/30 rounded-xl p-6 relative">
+          <div className="bg-[rgba(255,255,255,0.06)] backdrop-blur-xl border border-white/10 rounded-2xl p-6 relative shadow-xl shadow-black/20">
             <button
               onClick={() => setIsDismissed(true)}
               className="absolute top-4 right-4 text-white/60 hover:text-white transition-colors"
@@ -44,8 +44,8 @@ export function SetupNotification({ activeCategory }: SetupNotificationProps) {
             </button>
 
             <div className="flex items-start gap-4">
-              <div className="bg-purple-500/20 rounded-lg p-3">
-                <svg className="w-6 h-6 text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-white/10 rounded-lg p-3">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -63,7 +63,7 @@ export function SetupNotification({ activeCategory }: SetupNotificationProps) {
                     href="https://www.themoviedb.org/settings/api"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-purple-500/30 hover:bg-purple-500/40 backdrop-blur-sm border border-purple-400/40 rounded-lg px-4 py-2 text-white font-['Cabin:Regular',sans-serif] text-sm transition-all"
+                    className="flex items-center gap-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-2 text-white font-['Cabin:Regular',sans-serif] text-sm transition-all"
                   >
                     Get API Key
                     <ExternalLink className="w-4 h-4" />

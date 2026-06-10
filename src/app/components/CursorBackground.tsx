@@ -24,7 +24,7 @@ export function CursorBackground() {
       <motion.div
         className="absolute w-[600px] h-[600px] rounded-full blur-[120px] opacity-30"
         style={{
-          background: 'radial-gradient(circle, rgba(138,56,245,0.6) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 70%)',
           x: smoothMouseX,
           y: smoothMouseY,
           translateX: '-50%',
@@ -34,7 +34,7 @@ export function CursorBackground() {
       <motion.div
         className="absolute w-[500px] h-[500px] rounded-full blur-[100px] opacity-25"
         style={{
-          background: 'radial-gradient(circle, rgba(122,35,188,0.5) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.14) 0%, transparent 70%)',
           x: smoothMouseX,
           y: smoothMouseY,
           translateX: '-70%',
@@ -45,7 +45,7 @@ export function CursorBackground() {
       <motion.div
         className="absolute w-[400px] h-[400px] rounded-full blur-[80px] opacity-20"
         style={{
-          background: 'radial-gradient(circle, rgba(200,100,255,0.4) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
           x: smoothMouseX,
           y: smoothMouseY,
           translateX: '-30%',

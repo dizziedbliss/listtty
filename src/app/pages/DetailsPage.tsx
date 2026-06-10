@@ -1,14 +1,28 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
-import { ArrowLeft, Star } from 'lucide-react';
+import { ArrowLeft, Star, Edit2, Check, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import { fetchAnimeDetails, fetchMovieDetails, fetchShowDetails, AnimeDetails, MovieDetails, ShowDetails } from '../services/details';
 import { ListDropdown } from '../components/ListDropdown';
+import { useList } from '../contexts/ListContext';
 import { TMDB_IMAGE_BASE } from '../services/details';
 
 export function DetailsPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
   const navigate = useNavigate();
+  const { getItemList, updateRating, lists } = useList();
+  const [editingRating, setEditingRating] = useState(false);
+  const [ratingValue, setRatingValue] = useState<number>(0);
+
+  // Find current item rating from lists
+  const currentRating = useMemo(() => {
+    if (!id) return 0;
+    const itemType = type === 'movies' ? 'movie' : type === 'shows' ? 'show' : 'anime';
+    const allItems = [...lists.watching, ...lists.completed, ...lists.dropped, ...lists.watchlist];
+    const item = allItems.find(i => i.id === Number(id) && i.type === itemType);
+    return item?.rating || 0;
+  }, [id, type, lists]);
   const normalizedType = type === 'movies' ? 'movie' : type === 'shows' ? 'show' : type;
 
   const { data: details, isLoading, error } = useQuery({
@@ -56,7 +70,7 @@ export function DetailsPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={() => navigate('/')}
-          className="fixed top-6 left-6 z-50 bg-[rgba(138,56,245,0.3)] hover:bg-[rgba(138,56,245,0.5)] backdrop-blur-md border-2 border-white/20 rounded-full p-3 transition-all"
+          className="fixed top-6 left-6 z-50 bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.12)] backdrop-blur-md border border-white/10 rounded-full p-3 transition-all"
         >
           <ArrowLeft className="w-6 h-6" />
         </motion.button>
@@ -80,6 +94,7 @@ export function DetailsPage() {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0b1622] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
       </div>
 
       {/* Content */}
@@ -125,7 +140,7 @@ export function DetailsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex gap-4 mb-6"
+              className="flex gap-4 mb-6 items-center"
             >
               <ListDropdown
                 itemId={anime.id}
@@ -135,6 +150,56 @@ export function DetailsPage() {
                 year={anime.seasonYear?.toString()}
                 episodes={anime.episodes || undefined}
               />
+              {(() => {
+                const list = getItemList(anime.id, 'anime');
+                const isWatched = list === 'watching' || list === 'completed';
+                if (!isWatched) return null;
+                
+                return (
+                  <div className="flex items-center gap-2">
+                    {editingRating ? (
+                      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
+                        <input
+                          type="range"
+                          min={0}
+                          max={5}
+                          step={0.1}
+                          value={ratingValue}
+                          onChange={(e) => setRatingValue(Number(parseFloat(e.target.value).toFixed(1)))}
+                          className="w-32"
+                        />
+                        <span className="text-xl font-semibold min-w-[40px]">{ratingValue.toFixed(1)}</span>
+                        <button
+                          onClick={() => {
+                            updateRating(anime.id, 'anime', ratingValue);
+                            setEditingRating(false);
+                          }}
+                          className="text-green-400 hover:text-green-300 transition-colors"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingRating(false)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setRatingValue(currentRating);
+                          setEditingRating(true);
+                        }}
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm font-semibold">{currentRating > 0 ? currentRating.toFixed(1) : 'Rate'}</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </motion.div>
 
             {/* Stats */}
@@ -146,7 +211,7 @@ export function DetailsPage() {
             >
               {anime.averageScore && (
                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-3">
-                  <div className="flex items-center gap-1.5 text-yellow-400 mb-1">
+                  <div className="flex items-center gap-1.5 text-white mb-1">
                     <Star className="w-3.5 h-3.5 fill-current" />
                     <span className="text-xl font-bold">{anime.averageScore}%</span>
                   </div>
@@ -284,6 +349,7 @@ export function DetailsPage() {
                   />
                   <div className="p-2.5">
                     <p className="text-[10px] text-purple-400 mb-0.5 uppercase tracking-wide">{edge.relationType}</p>
+                                        <p className="text-[10px] text-white/60 mb-0.5 uppercase tracking-wide">{edge.relationType}</p>
                     <p className="font-semibold text-xs line-clamp-2">{edge.node.title.romaji}</p>
                   </div>
                 </div>
@@ -363,7 +429,7 @@ export function DetailsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="flex gap-4 mb-6"
+              className="flex gap-4 mb-6 items-center"
             >
               <ListDropdown
                 itemId={Number(id)}
@@ -373,6 +439,57 @@ export function DetailsPage() {
                 year={releaseDate?.split('-')[0]}
                 episodes={!isMovie ? (media as ShowDetails).number_of_episodes : undefined}
               />
+              {(() => {
+                const itemType = isMovie ? 'movie' : 'show';
+                const list = getItemList(Number(id), itemType);
+                const isWatched = list === 'watching' || list === 'completed';
+                if (!isWatched) return null;
+                
+                return (
+                  <div className="flex items-center gap-2">
+                    {editingRating ? (
+                      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
+                        <input
+                          type="range"
+                          min={0}
+                          max={5}
+                          step={0.1}
+                          value={ratingValue}
+                          onChange={(e) => setRatingValue(Number(parseFloat(e.target.value).toFixed(1)))}
+                          className="w-32"
+                        />
+                        <span className="text-xl font-semibold min-w-[40px]">{ratingValue.toFixed(1)}</span>
+                        <button
+                          onClick={() => {
+                            updateRating(Number(id), itemType, ratingValue);
+                            setEditingRating(false);
+                          }}
+                          className="text-green-400 hover:text-green-300 transition-colors"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingRating(false)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setRatingValue(currentRating);
+                          setEditingRating(true);
+                        }}
+                        className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4 text-yellow-400" />
+                        <span className="text-sm font-semibold">{currentRating > 0 ? currentRating.toFixed(1) : 'Rate'}</span>
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </motion.div>
 
             {/* Stats */}

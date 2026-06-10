@@ -3,9 +3,8 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AnimatePresence } from 'motion/react';
 import { ListProvider } from './contexts/ListContext';
-import { CursorBackground } from './components/CursorBackground';
-import { CursorGlow } from './components/CursorGlow';
-import { FloatingParticles } from './components/FloatingParticles';
+import { Toast, ToastMessage } from './components/Toast';
+import { ToastProvider } from './contexts/ToastContext';
 import { BottomNav } from './components/BottomNav';
 import { Sidebar } from './components/Sidebar';
 import { HomePage } from './pages/HomePage';
@@ -20,7 +19,13 @@ import imgImage1 from '../imports/MacBookPro161-1/f8f18319f4fb99fe2eb04e1f157c2a
 
 const queryClient = new QueryClient();
 
-function AppContent() {
+function AppContent({
+  toasts,
+  removeToast,
+}: {
+  toasts: ToastMessage[];
+  removeToast: (id: string) => void;
+}) {
   const [activeCategory, setActiveCategory] = useState<'movies' | 'shows' | 'anime'>('anime');
   const location = useLocation();
   const isHomePage = location.pathname === '/';
@@ -40,10 +45,10 @@ function AppContent() {
         </div>
       )}
 
-      {/* Cursor Effects */}
-      <CursorBackground />
-      <CursorGlow />
-      <FloatingParticles />
+      {/* Cursor Effects Removed - Disabled for cleaner UI */}
+
+      {/* Toast Notifications */}
+      <Toast toasts={toasts} onRemove={removeToast} />
 
       {/* Sidebar Navigation */}
       <Sidebar />
@@ -84,12 +89,29 @@ function AppContent() {
 }
 
 export default function App() {
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  const addToast = (message: Omit<ToastMessage, 'id'>) => {
+    const id = Math.random().toString(36).slice(2);
+    const toast: ToastMessage = { ...message, id };
+    setToasts((prev) => [...prev, toast]);
+
+    const duration = message.duration ?? 4000;
+    setTimeout(() => removeToast(id), duration);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <ListProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
+        <ToastProvider addToast={addToast}>
+          <BrowserRouter>
+            <AppContent toasts={toasts} removeToast={removeToast} />
+          </BrowserRouter>
+        </ToastProvider>
       </ListProvider>
     </QueryClientProvider>
   );

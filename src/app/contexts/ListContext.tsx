@@ -1,6 +1,9 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useListManager, ListType, ListItem } from '../hooks/useListManager';
 
+// Re-export types for convenience
+export type { ListType, ListItem };
+
 interface ListContextType {
   lists: {
     watchlist: ListItem[];
@@ -13,6 +16,19 @@ interface ListContextType {
   getItemList: (id: number, type: string) => ListType | null;
   updateProgress: (id: number, type: string, currentEpisode: number) => void;
   updateRating: (id: number, type: string, rating: number) => void;
+  undoLastProgress: () => void;
+  mergeExternalLists: (incoming: Partial<{
+    watchlist: ListItem[];
+    watching: ListItem[];
+    completed: ListItem[];
+    dropped: ListItem[];
+  }>) => void;
+  lastProgressChange: {
+    id: number;
+    type: string;
+    previousEpisode: number;
+    timestamp: number;
+  } | null;
 }
 
 const ListContext = createContext<ListContextType | undefined>(undefined);

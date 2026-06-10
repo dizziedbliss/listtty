@@ -27,10 +27,10 @@ export function Sidebar() {
     <motion.div
       initial={{ x: -100, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="fixed left-0 top-0 h-screen w-16 bg-[rgba(10,10,20,0.8)] backdrop-blur-2xl border-r border-white/5 z-40 flex flex-col items-center py-6"
+      className="fixed left-0 top-0 h-screen w-16 bg-[rgba(8,8,8,0.82)] backdrop-blur-2xl border-r border-white/10 z-40 flex flex-col items-center py-6"
     >
       {/* Logo */}
-      <div className="mb-10 w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-xl cursor-pointer shadow-lg shadow-purple-500/20" onClick={() => navigate('/')}>
+      <div className="mb-10 w-10 h-10 bg-white rounded-xl flex items-center justify-center text-black font-bold text-xl cursor-pointer shadow-lg shadow-white/10" onClick={() => navigate('/')}>
         M
       </div>
 
@@ -46,8 +46,8 @@ export function Sidebar() {
               onClick={() => navigate(item.path)}
               className={`group relative flex items-center justify-center w-full h-11 rounded-xl transition-all ${
                 active
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30'
-                  : 'text-gray-500 hover:bg-white/5 hover:text-gray-300'
+                  ? 'bg-white text-black shadow-lg shadow-white/10'
+                  : 'text-gray-500 hover:bg-white/5 hover:text-white'
               }`}
               title={item.name}
             >
@@ -76,7 +76,7 @@ export function Sidebar() {
       <div className="w-full px-2 space-y-1.5">
         <button
           onClick={() => navigate('/auth')}
-          className="group relative flex items-center justify-center w-full h-11 rounded-xl text-gray-500 hover:bg-white/5 hover:text-gray-300 transition-all"
+          className="group relative flex items-center justify-center w-full h-11 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all"
           title="Login"
         >
           <LogIn className="w-5 h-5" />

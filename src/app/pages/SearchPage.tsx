@@ -42,7 +42,7 @@ export function SearchPage() {
 
   const handleItemClick = (item: any) => {
     const type = item.type || searchType;
-    const routeType = type === 'movies' ? 'movie' : type === 'shows' ? 'show' : 'anime';
+    const routeType = type === 'movie' ? 'movie' : type === 'show' ? 'show' : 'anime';
     navigate(`/${routeType}/${item.id}`);
   };
 
@@ -76,18 +76,18 @@ export function SearchPage() {
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search anime, movies, or shows..."
-                className="w-full bg-[rgba(138,56,245,0.2)] backdrop-blur-md border-2 border-white/20 rounded-lg pl-14 pr-4 py-4 text-white text-xl placeholder-white/60 outline-none focus:border-purple-500 transition-colors"
+                className="w-full bg-[rgba(255,255,255,0.06)] backdrop-blur-md border border-white/10 rounded-xl pl-14 pr-4 py-4 text-white text-xl placeholder-white/50 outline-none focus:border-white/30 transition-colors"
               />
             </div>
             <button
               onClick={handleSearch}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors"
+              className="bg-white text-black hover:bg-white/90 px-8 py-4 rounded-lg font-semibold transition-colors"
             >
               Search
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="bg-[rgba(138,56,245,0.2)] hover:bg-[rgba(138,56,245,0.3)] backdrop-blur-md border-2 border-white/20 text-white px-6 py-4 rounded-lg flex items-center gap-2 transition-colors"
+              className="bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 text-white px-6 py-4 rounded-lg flex items-center gap-2 transition-colors"
             >
               <SlidersHorizontal className="w-5 h-5" />
               Filters
@@ -102,8 +102,8 @@ export function SearchPage() {
                 onClick={() => setSearchType(type as 'movies' | 'shows' | 'anime')}
                 className={`px-6 py-2 rounded-lg border-2 transition-all capitalize font-semibold ${
                   searchType === type
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'bg-transparent border-white/20 text-gray-400 hover:border-white/40'
+                    ? 'bg-white border-white text-black'
+                    : 'bg-transparent border-white/10 text-gray-400 hover:border-white/30'
                 }`}
               >
                 {type}
@@ -118,7 +118,7 @@ export function SearchPage() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-[rgba(138,56,245,0.15)] backdrop-blur-xl border-2 border-white/10 rounded-xl p-6 mb-8"
+            className="bg-[rgba(255,255,255,0.06)] backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8"
           >
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-2xl font-bold text-white">Filters</h3>
@@ -129,7 +129,7 @@ export function SearchPage() {
                   setSelectedStatus('');
                   setSelectedYear('');
                 }}
-                className="text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-white/70 hover:text-white transition-colors"
               >
                 Clear All
               </button>
@@ -146,8 +146,8 @@ export function SearchPage() {
                       onClick={() => toggleGenre(genre)}
                       className={`px-4 py-2 rounded-full text-sm transition-all ${
                         selectedGenres.includes(genre)
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-[rgba(138,56,245,0.2)] text-gray-300 hover:bg-[rgba(138,56,245,0.3)]'
+                          ? 'bg-white text-black'
+                          : 'bg-white/5 text-gray-300 hover:bg-white/10'
                       }`}
                     >
                       {genre}
@@ -162,7 +162,7 @@ export function SearchPage() {
                 <select
                   value={selectedFormat}
                   onChange={(e) => setSelectedFormat(e.target.value)}
-                  className="w-full bg-[rgba(0,0,0,0.3)] border-2 border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-purple-500"
+                  className="w-full bg-[rgba(255,255,255,0.04)] border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-white/30"
                 >
                   <option value="">All Formats</option>
                   {formats.map((format) => (
@@ -179,7 +179,7 @@ export function SearchPage() {
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="w-full bg-[rgba(0,0,0,0.3)] border-2 border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-purple-500"
+                  className="w-full bg-[rgba(255,255,255,0.04)] border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-white/30"
                 >
                   <option value="">All Status</option>
                   {statuses.map((status) => (
@@ -196,7 +196,7 @@ export function SearchPage() {
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(e.target.value)}
-                  className="w-full bg-[rgba(0,0,0,0.3)] border-2 border-white/20 rounded-lg px-4 py-3 text-white outline-none focus:border-purple-500"
+                  className="w-full bg-[rgba(255,255,255,0.04)] border border-white/10 rounded-lg px-4 py-3 text-white outline-none focus:border-white/30"
                 >
                   <option value="">All Years</option>
                   {years.map((year) => (

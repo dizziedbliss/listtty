@@ -15,9 +15,8 @@ interface ListDropdownProps {
 const listOptions: { value: ListType; label: string; color: string }[] = [
   { value: 'watching', label: 'Watching', color: 'bg-blue-600' },
   { value: 'completed', label: 'Completed', color: 'bg-green-600' },
-  { value: 'planning', label: 'Planning', color: 'bg-purple-600' },
-  { value: 'dropped', label: 'Dropped', color: 'bg-red-600' },
   { value: 'watchlist', label: 'Watchlist', color: 'bg-yellow-600' },
+  { value: 'dropped', label: 'Dropped', color: 'bg-red-600' },
 ];
 
 export function ListDropdown({ itemId, itemType, title, poster, year, episodes }: ListDropdownProps) {
