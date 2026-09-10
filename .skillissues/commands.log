@@ -223,3 +223,26 @@ M .skillissues/commands.log
  D supabase/functions/server/kv_store.tsx
  D supabase/functions/server/routes.tsx
  D supabase/migrations/add_friends_tables.sql
+2026-09-10T04:54:13.798Z $ git add .
+
+2026-09-10T04:54:13.915Z $ git commit -m "Fix issue #4: deadly"
+[skillissues/issuem 062cfc3] Fix issue #4: deadly
+ 6 files changed, 35 insertions(+), 1219 deletions(-)
+ delete mode 100644 supabase/functions/server/deno.json
+ delete mode 100644 supabase/functions/server/index.tsx
+ delete mode 100644 supabase/functions/server/kv_store.tsx
+ delete mode 100644 supabase/functions/server/routes.tsx
+ delete mode 100644 supabase/migrations/add_friends_tables.sql
+2026-09-10T04:54:13.975Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T04:54:16.651Z $ git push --set-upstream origin "skillissues/issuem"
+branch 'skillissues/issuem' set up to track 'origin/skillissues/issuem'.
+2026-09-10T05:57:10.086Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T05:57:10.211Z $ git status --short --branch
+## skillissues/issuem...origin/skillissues/issuem
+ M .skillissues/commands.log
+2026-09-10T05:57:27.296Z $ git switch -c "skillissues/issue-4-lol"
+
+2026-09-10T05:57:35.617Z $ git status --porcelain
+M .skillissues/commands.log
