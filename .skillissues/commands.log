@@ -1,0 +1,12 @@
+2026-09-10T01:31:57.710Z $ git clone "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T01:31:57.764Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T01:31:57.926Z $ git status --short --branch
+## main...origin/main
+?? .skillissues/
+2026-09-10T01:32:06.036Z $ git switch -c "skillissues/issue"
+
+2026-09-10T01:32:50.240Z $ git status --porcelain
+?? .skillissues/
+?? pr.txt
