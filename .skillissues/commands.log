@@ -321,3 +321,45 @@ branch 'skillissues/immmm' set up to track 'origin/skillissues/immmm'.
 2026-09-10T08:23:30.881Z $ git status --porcelain
 M .skillissues/commands.log
  D guidelines/Guidelines.md
+2026-09-10T08:23:30.961Z $ git add .
+
+2026-09-10T08:23:31.112Z $ git commit -m "Fix issue #4: deadly"
+[skillissues/vvvj a55af3d] Fix issue #4: deadly
+ 2 files changed, 20 insertions(+), 61 deletions(-)
+ delete mode 100644 guidelines/Guidelines.md
+2026-09-10T08:23:31.187Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T08:23:34.242Z $ git push --set-upstream origin "skillissues/vvvj"
+branch 'skillissues/vvvj' set up to track 'origin/skillissues/vvvj'.
+2026-09-10T08:46:06.538Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T08:46:06.640Z $ git status --short --branch
+## skillissues/vvvj...origin/skillissues/vvvj
+ M .skillissues/commands.log
+2026-09-10T08:46:18.169Z $ git switch -c "skillissues/issue16"
+
+2026-09-10T08:46:52.144Z $ git status --porcelain
+M .skillissues/commands.log
+ D src/app/hooks/useListManager.ts
+ D src/app/hooks/useMediaData.ts
+2026-09-10T08:46:52.239Z $ git add .
+
+2026-09-10T08:46:52.393Z $ git commit -m "deleted smth idk"
+[skillissues/issue16 0c487e6] deleted smth idk
+ 3 files changed, 21 insertions(+), 497 deletions(-)
+ delete mode 100644 src/app/hooks/useListManager.ts
+ delete mode 100644 src/app/hooks/useMediaData.ts
+2026-09-10T08:46:52.465Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T08:46:55.546Z $ git push --set-upstream origin "skillissues/issue16"
+branch 'skillissues/issue16' set up to track 'origin/skillissues/issue16'.
+2026-09-10T08:48:11.050Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T08:48:11.119Z $ git status --short --branch
+## skillissues/issue16...origin/skillissues/issue16
+ M .skillissues/commands.log
+2026-09-10T08:48:19.168Z $ git switch -c "skillissues/issue-ewe"
+
+2026-09-10T08:48:39.528Z $ git status --porcelain
+M .skillissues/commands.log
+ D src/app/App.tsx
