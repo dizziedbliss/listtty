@@ -31,3 +31,28 @@ branch 'skillissues/issue' set up to track 'origin/skillissues/issue'.
 2026-09-10T01:40:58.639Z $ git status --porcelain
 M .skillissues/commands.log
  D pr.txt
+2026-09-10T01:40:58.703Z $ git add .
+
+2026-09-10T01:40:58.831Z $ git commit -m "delete pr"
+[skillissues/bug e47c6ce] delete pr
+ 2 files changed, 21 insertions(+)
+ delete mode 100644 pr.txt
+2026-09-10T01:40:58.887Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T01:41:01.470Z $ git push --set-upstream origin "skillissues/bug"
+branch 'skillissues/bug' set up to track 'origin/skillissues/bug'.
+2026-09-10T01:59:03.210Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T01:59:03.291Z $ git status --short --branch
+## skillissues/bug...origin/skillissues/bug
+ M .skillissues/commands.log
+2026-09-10T01:59:09.829Z $ git switch -c "skillissues/is"
+
+2026-09-10T01:59:23.479Z $ git status --porcelain
+M .skillissues/commands.log
+ D README.md
+ D SETUP_GUIDE.md
+ D package-lock.json
+ D package.json
+ D pnpm-workspace.yaml
+ D postcss.config.mjs
