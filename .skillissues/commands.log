@@ -134,3 +134,32 @@ branch 'skillissues/ikhbvg' set up to track 'origin/skillissues/ikhbvg'.
 M .skillissues/commands.log
  D "ATTRIBUTIONS - Copy.md"
  D ATTRIBUTIONS.md
+2026-09-10T02:33:38.444Z $ git add .
+
+2026-09-10T02:33:38.569Z $ git commit -m "Fix issue #4: deadly"
+[skillissues/iss 62e42b5] Fix issue #4: deadly
+ 3 files changed, 24 insertions(+), 6 deletions(-)
+ delete mode 100644 ATTRIBUTIONS - Copy.md
+ delete mode 100644 ATTRIBUTIONS.md
+2026-09-10T02:33:38.625Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T02:33:40.840Z $ git push --set-upstream origin "skillissues/iss"
+branch 'skillissues/iss' set up to track 'origin/skillissues/iss'.
+2026-09-10T04:41:17.312Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T04:41:17.381Z $ git status --short --branch
+## skillissues/iss...origin/skillissues/iss
+ M .skillissues/commands.log
+2026-09-10T04:41:22.719Z $ git switch -c "skillissues/is"
+fatal: a branch named 'skillissues/is' already exists
+2026-09-10T04:41:22.776Z $ git switch "skillissues/is"
+error: Your local changes to the following files would be overwritten by checkout:
+	.skillissues/commands.log
+Please commit your changes or stash them before you switch branches.
+Aborting
+2026-09-10T04:41:28.215Z $ git switch -c "skillissues/ishh"
+
+2026-09-10T04:41:39.321Z $ git status --porcelain
+M .skillissues/commands.log
+ D "API_INTEGRATION - Copy.md"
+ D API_INTEGRATION.md
