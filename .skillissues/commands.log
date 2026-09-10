@@ -10,3 +10,24 @@
 2026-09-10T01:32:50.240Z $ git status --porcelain
 ?? .skillissues/
 ?? pr.txt
+2026-09-10T01:32:50.307Z $ git add .
+
+2026-09-10T01:32:50.429Z $ git commit -m "Added PR.txt"
+[skillissues/issue 8ce01da] Added PR.txt
+ 2 files changed, 12 insertions(+)
+ create mode 100644 .skillissues/commands.log
+ create mode 100644 pr.txt
+2026-09-10T01:32:50.488Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T01:32:53.306Z $ git push --set-upstream origin "skillissues/issue"
+branch 'skillissues/issue' set up to track 'origin/skillissues/issue'.
+2026-09-10T01:40:28.318Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T01:40:28.403Z $ git status --short --branch
+## skillissues/issue...origin/skillissues/issue
+ M .skillissues/commands.log
+2026-09-10T01:40:35.798Z $ git switch -c "skillissues/bug"
+
+2026-09-10T01:40:58.639Z $ git status --porcelain
+M .skillissues/commands.log
+ D pr.txt
