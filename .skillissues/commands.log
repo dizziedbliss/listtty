@@ -342,3 +342,24 @@ branch 'skillissues/vvvj' set up to track 'origin/skillissues/vvvj'.
 M .skillissues/commands.log
  D src/app/hooks/useListManager.ts
  D src/app/hooks/useMediaData.ts
+2026-09-10T08:46:52.239Z $ git add .
+
+2026-09-10T08:46:52.393Z $ git commit -m "deleted smth idk"
+[skillissues/issue16 0c487e6] deleted smth idk
+ 3 files changed, 21 insertions(+), 497 deletions(-)
+ delete mode 100644 src/app/hooks/useListManager.ts
+ delete mode 100644 src/app/hooks/useMediaData.ts
+2026-09-10T08:46:52.465Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T08:46:55.546Z $ git push --set-upstream origin "skillissues/issue16"
+branch 'skillissues/issue16' set up to track 'origin/skillissues/issue16'.
+2026-09-10T08:48:11.050Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T08:48:11.119Z $ git status --short --branch
+## skillissues/issue16...origin/skillissues/issue16
+ M .skillissues/commands.log
+2026-09-10T08:48:19.168Z $ git switch -c "skillissues/issue-ewe"
+
+2026-09-10T08:48:39.528Z $ git status --porcelain
+M .skillissues/commands.log
+ D src/app/App.tsx
