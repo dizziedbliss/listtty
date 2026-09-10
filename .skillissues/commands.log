@@ -188,3 +188,38 @@ D " - Copy.env"
  D .gitignore
  M .skillissues/commands.log
  D utils/supabase/info.tsx
+2026-09-10T04:52:13.283Z $ git add .
+
+2026-09-10T04:52:13.381Z $ git commit -m "Fix issue #2: bug lol"
+[skillissues/gggg a4cdf3c] Fix issue #2: bug lol
+ 6 files changed, 25 insertions(+), 30 deletions(-)
+ delete mode 100644  - Copy.env
+ delete mode 100644  - Copy.gitignore
+ delete mode 100644 .env
+ delete mode 100644 .gitignore
+ delete mode 100644 utils/supabase/info.tsx
+2026-09-10T04:52:13.434Z $ git remote get-url origin
+https://github.com/dizziedbliss/listtty.git
+2026-09-10T04:52:16.476Z $ git push --set-upstream origin "skillissues/gggg"
+branch 'skillissues/gggg' set up to track 'origin/skillissues/gggg'.
+2026-09-10T04:53:46.429Z $ git remote set-url origin "https://github.com/dizziedbliss/listtty.git"
+
+2026-09-10T04:53:46.496Z $ git status --short --branch
+## skillissues/gggg...origin/skillissues/gggg
+ M .skillissues/commands.log
+2026-09-10T04:53:53.546Z $ git switch -c "skillissues/issue"
+fatal: a branch named 'skillissues/issue' already exists
+2026-09-10T04:53:53.611Z $ git switch "skillissues/issue"
+error: Your local changes to the following files would be overwritten by checkout:
+	.skillissues/commands.log
+Please commit your changes or stash them before you switch branches.
+Aborting
+2026-09-10T04:53:56.386Z $ git switch -c "skillissues/issuem"
+
+2026-09-10T04:54:13.728Z $ git status --porcelain
+M .skillissues/commands.log
+ D supabase/functions/server/deno.json
+ D supabase/functions/server/index.tsx
+ D supabase/functions/server/kv_store.tsx
+ D supabase/functions/server/routes.tsx
+ D supabase/migrations/add_friends_tables.sql
