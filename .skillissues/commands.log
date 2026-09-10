@@ -276,3 +276,29 @@ branch 'skillissues/issue-4' set up to track 'origin/skillissues/issue-4'.
 2026-09-10T09:52:46.399Z $ git status --porcelain
 M .skillissues/commands.log
  M src/main.tsx
+2026-09-10T09:52:46.413Z $ git add .
+
+2026-09-10T09:52:46.440Z $ git commit -m "Fix issue #4: deadly"
+[skillissues/issgggh 6312c78] Fix issue #4: deadly
+ 2 files changed, 20 insertions(+), 4 deletions(-)
+2026-09-10T09:52:46.449Z $ git remote get-url origin
+https://github.com/gurunandansn/listtty.git
+2026-09-10T09:52:48.971Z $ git push --set-upstream origin "skillissues/issgggh"
+branch 'skillissues/issgggh' set up to track 'origin/skillissues/issgggh'.
+2026-09-10T09:54:43.199Z $ git remote set-url origin "https://github.com/gurunandansn/listtty.git"
+
+2026-09-10T09:54:43.230Z $ git status --short --branch
+## skillissues/issgggh...origin/skillissues/issgggh
+ M .skillissues/commands.log
+2026-09-10T09:55:34.109Z $ git switch -c "skillissues/issue-4"
+fatal: a branch named 'skillissues/issue-4' already exists
+2026-09-10T09:55:34.123Z $ git switch "skillissues/issue-4"
+error: Your local changes to the following files would be overwritten by checkout:
+	.skillissues/commands.log
+Please commit your changes or stash them before you switch branches.
+Aborting
+2026-09-10T09:55:42.074Z $ git switch -c "skillissues/is55555-4"
+
+2026-09-10T09:55:57.361Z $ git status --porcelain
+M .skillissues/commands.log
+?? gdhdh.hi
